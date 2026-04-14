@@ -1,0 +1,31 @@
+<div class="app">
+  <div class="header">
+    <h1>Tiny URL</h1>
+  </div>
+
+  <div class="form-row">
+    <input type="text" [(ngModel)]="url" placeholder="https://example.com" />
+    <label><input type="checkbox" [(ngModel)]="isPrivate" /> Private</label>
+    <button (click)="shorten()">Shorten</button>
+  </div>
+
+  <div *ngIf="result">
+    <p>Short code: <strong>{{result.shortCode}}</strong></p>
+    <p>Full: <a [href]="result.full" target="_blank">{{result.full}}</a></p>
+  </div>
+
+  <div class="list">
+    <h2>Public Short URLs</h2>
+    <input type="text" placeholder="Search" [(ngModel)]="search" (input)="load()" />
+    <div *ngFor="let i of items | slice:0:100" class="item">
+      <div>
+        <div><strong>{{i.shortCode}}</strong> - <a [href]="i.originalUrl" target="_blank">{{i.originalUrl}}</a></div>
+        <div>Clicks: {{i.hits}}</div>
+      </div>
+      <div class="actions">
+        <button (click)="copy(i.shortCode)">Copy</button>
+        <button (click)="delete(i.shortCode)">Delete</button>
+      </div>
+    </div>
+  </div>
+</div>

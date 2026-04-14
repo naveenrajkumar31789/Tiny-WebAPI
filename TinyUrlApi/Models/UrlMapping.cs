@@ -7,4 +7,5 @@ public class UrlMapping
     public string OriginalUrl { get; set; } = null!;
     public DateTime CreatedAt { get; set; }
     public int Hits { get; set; }
+    public bool IsPrivate { get; set; }
 }

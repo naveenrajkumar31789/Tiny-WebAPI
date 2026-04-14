@@ -15,17 +15,26 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
+        // Allow CORS for local frontend (Angular default port 4200)
+        builder.Services.AddCors(options =>
+        {
+            options.AddDefaultPolicy(policy =>
+                policy.WithOrigins("http://localhost:4200")
+                      .AllowAnyHeader()
+                      .AllowAnyMethod());
+        });
+
         // Configure SQLite database
         builder.Services.AddDbContext<AppDbContext>(options =>
             options.UseSqlite("Data Source=tinyurls.db"));
 
         var app = builder.Build();
 
-        // Ensure database is created
+        // Apply EF migrations (preferred) so schema changes like new columns are applied
         using (var scope = app.Services.CreateScope())
         {
             var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            db.Database.EnsureCreated();
+            db.Database.Migrate();
         }
 
         if (app.Environment.IsDevelopment())
@@ -33,6 +42,8 @@ public class Program
             app.UseSwagger();
             app.UseSwaggerUI();
         }
+
+        app.UseCors();
 
         app.UseHttpsRedirection();
 
@@ -72,12 +83,13 @@ public class Program
                 OriginalUrl = uri.ToString(),
                 CreatedAt = DateTime.UtcNow,
                 Hits = 0
+                ,IsPrivate = request.IsPrivate
             };
 
             db.UrlMappings.Add(mapping);
             await db.SaveChangesAsync();
 
-            var resp = new Models.ShortenResponse(mapping.ShortCode, mapping.OriginalUrl, mapping.CreatedAt);
+            var resp = new Models.ShortenResponse(mapping.ShortCode, mapping.OriginalUrl, mapping.CreatedAt, mapping.IsPrivate, mapping.Hits);
             return Results.Created($"/api/public/{mapping.ShortCode}", resp);
         });
 
@@ -119,9 +131,13 @@ public class Program
             return Results.NoContent();
         });
 
-        // Public listing of mappings (GET /api/public)
+        // Public listing of mappings (GET /api/public) -- only non-private
         app.MapGet("/api/public", async (AppDbContext db) =>
-            await db.UrlMappings.OrderByDescending(u => u.CreatedAt).ToListAsync());
+            await db.UrlMappings
+                .Where(u => !u.IsPrivate)
+                .OrderByDescending(u => u.CreatedAt)
+                .Select(u => new Models.ShortenResponse(u.ShortCode, u.OriginalUrl, u.CreatedAt, u.IsPrivate, u.Hits))
+                .ToListAsync());
 
         // Redirect short code to original URL (GET /{code})
         app.MapGet("/{code}", async (string code, AppDbContext db) =>

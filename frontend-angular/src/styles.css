@@ -1,0 +1,10 @@
+/* global styles */
+body{font-family:Segoe UI,Arial;margin:20px;background:#f6f8fb}
+.app{max-width:900px;margin:0 auto;padding:20px;background:#fff;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+.header{display:flex;justify-content:space-between;align-items:center}
+.form-row{display:flex;gap:8px;margin-top:12px}
+input[type=text]{flex:1;padding:8px}
+button{padding:8px 12px}
+.list{margin-top:20px}
+.item{padding:10px;border-bottom:1px solid #eee;display:flex;justify-content:space-between}
+.actions button{margin-left:8px}

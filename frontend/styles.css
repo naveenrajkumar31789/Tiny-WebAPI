@@ -1,0 +1,13 @@
+body{font-family:Segoe UI,Arial;margin:20px;background:#f6f8fb}
+.container{max-width:900px;margin:0 auto;padding:20px;background:#fff;border-radius:6px;box-shadow:0 2px 6px rgba(0,0,0,.08)}
+h1{margin-top:0}
+.shorten,input,button{display:block}
+input{padding:8px;margin:8px 0;width:100%;box-sizing:border-box}
+button{padding:8px 12px}
+#list{list-style:none;padding:0}
+#list li{padding:10px;border-bottom:1px solid #eee;display:flex;justify-content:space-between;align-items:center}
+.code{font-weight:600;margin-right:10px}
+.actions button{margin-left:8px}
+#shortenResult{margin-top:8px}
+.search-row{display:flex;gap:8px}
+@media(min-width:600px){.search-row input{flex:1}}
