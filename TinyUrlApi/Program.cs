@@ -15,13 +15,21 @@ public class Program
         builder.Services.AddEndpointsApiExplorer();
         builder.Services.AddSwaggerGen();
 
-        // Allow CORS for local frontend (Angular default port 4200)
+        // Allow CORS for local frontend (Angular dev server on 4200).
+        // Include http and https variants and localhost/127.0.0.1 to avoid preflight issues.
         builder.Services.AddCors(options =>
         {
-            options.AddDefaultPolicy(policy =>
-                policy.WithOrigins("http://localhost:4200")
-                      .AllowAnyHeader()
-                      .AllowAnyMethod());
+            options.AddPolicy(name: "CorsPolicy", policy =>
+            {
+                policy.WithOrigins(
+                        "http://localhost:4200",
+                        "https://localhost:4200",
+                        "http://127.0.0.1:4200",
+                        "https://127.0.0.1:4200"
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod();
+            });
         });
 
         // Configure SQLite database
@@ -43,7 +51,8 @@ public class Program
             app.UseSwaggerUI();
         }
 
-        app.UseCors();
+        // Enable the named CORS policy
+        app.UseCors("CorsPolicy");
 
         app.UseHttpsRedirection();
 
@@ -82,8 +91,8 @@ public class Program
                 ShortCode = code,
                 OriginalUrl = uri.ToString(),
                 CreatedAt = DateTime.UtcNow,
-                Hits = 0
-                ,IsPrivate = request.IsPrivate
+                Hits = 0,
+                IsPrivate = request.IsPrivate
             };
 
             db.UrlMappings.Add(mapping);
@@ -127,6 +136,8 @@ public class Program
                 return Results.BadRequest(new { error = "Invalid URL." });
 
             mapping.OriginalUrl = uri.ToString();
+            mapping.IsPrivate = request.IsPrivate;
+            db.UrlMappings.Update(mapping);
             await db.SaveChangesAsync();
             return Results.NoContent();
         });
