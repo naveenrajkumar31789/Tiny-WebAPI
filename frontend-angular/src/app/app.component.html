@@ -1,31 +1,60 @@
 <div class="app">
+  <!-- Header -->
   <div class="header">
     <h1>Tiny URL</h1>
   </div>
 
-  <div class="form-row">
-    <input type="text" [(ngModel)]="url" placeholder="https://example.com" />
-    <label><input type="checkbox" [(ngModel)]="isPrivate" /> Private</label>
-    <button (click)="shorten()">Shorten</button>
+  <!-- Form Section -->
+  <div class="form-section">
+    <div class="form-row">
+      <input type="text" [(ngModel)]="url" placeholder="Enter URL to shorten" class="url-input" />
+      <label class="private-label"><input type="checkbox" [(ngModel)]="isPrivate" /> IsPrivate</label>
+    </div>
+    <button (click)="shorten()" class="btn-shorten">Generate</button>
+
+    <!-- Result Message -->
+    <div *ngIf="result" class="result-box">
+      <p><strong>Short Code:</strong> <span class="code">{{result.shortCode}}</span></p>
+      <p><strong>Full URL:</strong> <a [href]="result.full" target="_blank" class="result-link">{{result.full}}</a></p>
+    </div>
   </div>
 
-  <div *ngIf="result">
-    <p>Short code: <strong>{{result.shortCode}}</strong></p>
-    <p>Full: <a [href]="result.full" target="_blank">{{result.full}}</a></p>
-  </div>
+  <!-- Public URLs Section -->
+  <div class="list-section">
+    <h2>Public URLs</h2>
+    <input type="text" placeholder="Search URLs ..." [(ngModel)]="search" (input)="updateFilteredList()" class="search-input" />
 
-  <div class="list">
-    <h2>Public Short URLs</h2>
-    <input type="text" placeholder="Search" [(ngModel)]="search" (input)="load()" />
-    <div *ngFor="let i of items | slice:0:100" class="item">
-      <div>
-        <div><strong>{{i.shortCode}}</strong> - <a [href]="i.originalUrl" target="_blank">{{i.originalUrl}}</a></div>
-        <div>Clicks: {{i.hits}}</div>
+    <!-- List Container -->
+    <div class="list-container">
+      <!-- List Items -->
+      <div *ngIf="filteredItems.length > 0; else noResults">
+        <div *ngFor="let item of filteredItems" class="list-item">
+          <!-- URL Row with Code and Link -->
+          <div class="url-row">
+            <span class="code-badge">{{item.shortCode}}</span>
+            <div class="col-url">
+              <a [href]="item.originalUrl" target="_blank" class="url-link" title="{{item.originalUrl}}">{{item.originalUrl}}</a>
+              <span class="url-description">{{item.originalUrl | slice:0:30}}...</span>
+            </div>
+          </div>
+
+          <!-- Clicks and Actions Row -->
+          <div class="url-meta">
+            <div class="col-clicks">
+              <span class="clicks-badge">{{item.hits}} clicks</span>
+            </div>
+            <div class="col-actions">
+              <button (click)="copy(item.shortCode)" class="btn-copy" title="Copy to clipboard">Copy</button>
+              <button (click)="delete(item.shortCode)" class="btn-delete" title="Delete URL">Delete</button>
+            </div>
+          </div>
+        </div>
       </div>
-      <div class="actions">
-        <button (click)="copy(i.shortCode)">Copy</button>
-        <button (click)="delete(i.shortCode)">Delete</button>
-      </div>
+
+      <!-- No Results -->
+      <ng-template #noResults>
+        <div class="no-results">No URLs found</div>
+      </ng-template>
     </div>
   </div>
 </div>

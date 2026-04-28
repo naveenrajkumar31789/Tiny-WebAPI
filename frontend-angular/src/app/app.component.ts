@@ -15,6 +15,7 @@ export class AppComponent {
   url = '';
   isPrivate = false;
   items: any[] = [];
+  filteredItems: any[] = [];
   search = '';
   result: any = null;
 
@@ -31,6 +32,19 @@ export class AppComponent {
 
   async load(){
     this.items = await this.svc.getPublic();
+    this.updateFilteredList();
+  }
+
+  updateFilteredList(){
+    if(!this.search.trim()){
+      this.filteredItems = this.items;
+    } else {
+      const q = this.search.trim().toLowerCase();
+      this.filteredItems = this.items.filter(i =>
+        i.shortCode.toLowerCase().includes(q) ||
+        i.originalUrl.toLowerCase().includes(q)
+      );
+    }
   }
 
   async delete(code: string){
